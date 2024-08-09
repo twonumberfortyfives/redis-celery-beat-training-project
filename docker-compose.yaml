@@ -1,0 +1,25 @@
+services:
+
+  redis:
+    image: redis
+    restart: always
+
+  web:
+    restart: always
+    build:
+      context: .
+    ports:
+      - "8000:8000"
+    command: > 
+      sh -c "python manage.py migrate &&
+      python manage.py runserver 0.0.0.0:8000"
+    volumes:
+      - ./db.sqlite3:/app/db.sqlite3
+
+  worker:
+    restart: always
+    build:
+      context: .
+    volumes:
+      - ./media:/app/media
+    command: ["celery", "-A", "celeryredistraining", "worker", "--loglevel=info"]
