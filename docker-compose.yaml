@@ -22,4 +22,19 @@ services:
       context: .
     volumes:
       - ./media:/app/media
+      - ./db.sqlite3:/app/db.sqlite3
     command: ["celery", "-A", "celeryredistraining", "worker", "--loglevel=info"]
+
+
+  mqtt_client:
+    restart: always
+    build:
+      context: .
+    volumes:
+      - ./main:/app/main
+      - ./celeryredistraining:/app/celeryredistraining
+
+    command: >
+      sh -c "python main/mqtt.py && python main/mqtt_simulator.py"
+    depends_on:
+      - redis
